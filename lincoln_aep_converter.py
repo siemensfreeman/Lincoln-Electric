@@ -1,11 +1,20 @@
+#!/usr/bin/env python3
 """
-Convert lincoln AEP.html to PowerPoint presentation using python-pptx
+Generate lincoln_AEP.pptx and push to GitHub
+Run this script to create the presentation file
 """
 
-from pptx import Presentation
-from pptx.util import Inches, Pt
-from pptx.enum.text import PP_ALIGN, MSO_ANCHOR
-from pptx.dml.color import RGBColor
+import sys
+from io import BytesIO
+from pathlib import Path
+
+try:
+    from pptx import Presentation
+    from pptx.util import Inches, Pt
+    from pptx.dml.color import RGBColor
+except ImportError:
+    print("Error: python-pptx not installed. Install with: pip install python-pptx")
+    sys.exit(1)
 
 # Color scheme from HTML
 COLORS = {
@@ -94,11 +103,7 @@ def create_presentation():
     for row_data in ROWS:
         create_row_slide(prs, row_data)
     
-    # Save presentation
-    output_file = 'lincoln_AEP.pptx'
-    prs.save(output_file)
-    print(f"✓ Presentation created: {output_file}")
-    return output_file
+    return prs
 
 def create_title_slide(prs):
     """Create title slide"""
@@ -113,11 +118,11 @@ def create_title_slide(prs):
     logo_box.fill.solid()
     logo_box.fill.fore_color.rgb = ACCENT_COLOR
     logo_box.line.color.rgb = ACCENT_COLOR
-    logo_tf = logo_box.text_frame
-    logo_tf.text = "SIEMENS"
-    logo_tf.paragraphs[0].font.size = Pt(12)
-    logo_tf.paragraphs[0].font.bold = True
-    logo_tf.paragraphs[0].font.color.rgb = LIGHT_TEXT
+    tf = logo_box.text_frame
+    tf.text = "SIEMENS"
+    tf.paragraphs[0].font.size = Pt(12)
+    tf.paragraphs[0].font.bold = True
+    tf.paragraphs[0].font.color.rgb = LIGHT_TEXT
     
     # Eyebrow
     eyebrow = slide.shapes.add_textbox(Inches(1.8), Inches(0.55), Inches(7), Inches(0.3))
@@ -127,7 +132,6 @@ def create_title_slide(prs):
     p.font.size = Pt(10)
     p.font.bold = True
     p.font.color.rgb = ACCENT_COLOR
-    p.letter_spacing = 0.15
     
     # Title
     title = slide.shapes.add_textbox(Inches(1.8), Inches(0.95), Inches(7.5), Inches(1.5))
@@ -279,5 +283,15 @@ def create_row_slide(prs, row_data):
     p.font.color.rgb = MUTED_TEXT
     p.line_spacing = 1.3
 
+def get_pptx_binary():
+    """Generate presentation and return binary data"""
+    prs = create_presentation()
+    pptx_io = BytesIO()
+    prs.save(pptx_io)
+    pptx_io.seek(0)
+    return pptx_io.read()
+
 if __name__ == '__main__':
-    create_presentation()
+    prs = create_presentation()
+    prs.save('lincoln_AEP.pptx')
+    print("✓ Presentation created: lincoln_AEP.pptx")
