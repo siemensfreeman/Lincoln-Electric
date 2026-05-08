@@ -3,6 +3,9 @@ name: Generate Lincoln AEP PPTX
 on:
   workflow_dispatch:
 
+permissions:
+  contents: write
+
 jobs:
   generate:
     runs-on: ubuntu-latest
@@ -22,10 +25,8 @@ jobs:
       - name: Generate PPTX
         run: python lincoln_aep_converter.py
       
-      - name: Commit and push PPTX
-        run: |
-          git config --local user.email "action@github.com"
-          git config --local user.name "GitHub Action"
-          git add lincoln_AEP.pptx
-          git commit -m "Generate lincoln_AEP.pptx" || echo "No changes to commit"
-          git push
+      - name: Upload PPTX as artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: lincoln_AEP
+          path: lincoln_AEP.pptx
