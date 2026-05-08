@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Generate lincoln_AEP.pptx and push to GitHub
+Generate lincoln_AEP.pptx with all content on one slide
 Run this script to create the presentation file
 """
 
@@ -91,197 +91,133 @@ ROWS = [
 ]
 
 def create_presentation():
-    """Create PowerPoint presentation from data"""
+    """Create PowerPoint presentation with all content on one slide"""
     prs = Presentation()
-    prs.slide_width = Inches(10)
-    prs.slide_height = Inches(7.5)
+    prs.slide_width = Inches(16)
+    prs.slide_height = Inches(10)
     
-    # Create title slide
-    create_title_slide(prs)
-    
-    # Create one slide per row
-    for row_data in ROWS:
-        create_row_slide(prs, row_data)
-    
-    return prs
-
-def create_title_slide(prs):
-    """Create title slide"""
     slide = prs.slides.add_slide(prs.slide_layouts[6])  # Blank layout
     background = slide.background
     fill = background.fill
     fill.solid()
     fill.fore_color.rgb = DARK_BG
     
-    # Logo
-    logo_box = slide.shapes.add_shape(1, Inches(0.5), Inches(0.5), Inches(1), Inches(0.4))
-    logo_box.fill.solid()
-    logo_box.fill.fore_color.rgb = ACCENT_COLOR
-    logo_box.line.color.rgb = ACCENT_COLOR
-    tf = logo_box.text_frame
-    tf.text = "SIEMENS"
-    tf.paragraphs[0].font.size = Pt(12)
-    tf.paragraphs[0].font.bold = True
-    tf.paragraphs[0].font.color.rgb = LIGHT_TEXT
+    # Title section
+    title_box = slide.shapes.add_textbox(Inches(0.5), Inches(0.3), Inches(15), Inches(0.7))
+    tf = title_box.text_frame
+    tf.word_wrap = True
+    p = tf.paragraphs[0]
+    p.text = "The Agentic Enterprise Platform — From Pain to Outcome"
+    p.font.size = Pt(32)
+    p.font.bold = True
+    p.font.color.rgb = LIGHT_TEXT
     
     # Eyebrow
-    eyebrow = slide.shapes.add_textbox(Inches(1.8), Inches(0.55), Inches(7), Inches(0.3))
-    tf = eyebrow.text_frame
-    tf.text = "PLATFORM RESPONSE"
+    eyebrow_box = slide.shapes.add_textbox(Inches(0.5), Inches(0.05), Inches(2), Inches(0.25))
+    tf = eyebrow_box.text_frame
     p = tf.paragraphs[0]
-    p.font.size = Pt(10)
+    p.text = "PLATFORM RESPONSE"
+    p.font.size = Pt(9)
     p.font.bold = True
     p.font.color.rgb = ACCENT_COLOR
     
-    # Title
-    title = slide.shapes.add_textbox(Inches(1.8), Inches(0.95), Inches(7.5), Inches(1.5))
-    tf = title.text_frame
-    tf.word_wrap = True
-    tf.text = "The Agentic Enterprise Platform — From Pain to Outcome"
-    p = tf.paragraphs[0]
-    p.font.size = Pt(36)
-    p.font.bold = True
-    p.font.color.rgb = LIGHT_TEXT
-    p.line_spacing = 1.2
-
-def create_row_slide(prs, row_data):
-    """Create a slide for each row"""
-    slide = prs.slides.add_slide(prs.slide_layouts[6])  # Blank layout
-    background = slide.background
-    fill = background.fill
-    fill.solid()
-    fill.fore_color.rgb = DARK_BG
+    # Create 5 columns, one per row
+    col_width = Inches(3.0)
+    col_height = Inches(8.8)
+    col_top = Inches(1.2)
+    col_gap = Inches(0.15)
     
+    for idx, row_data in enumerate(ROWS):
+        col_left = Inches(0.5) + (idx * (col_width + col_gap))
+        create_column(slide, col_left, col_top, col_width, col_height, row_data)
+    
+    return prs
+
+def create_column(slide, left, top, width, height, row_data):
+    """Create a single column for one row"""
     row_id = row_data['row_id']
     color = COLORS[row_id]
     
-    # Header with capability number and title
-    header_left = Inches(0.5)
-    header_top = Inches(0.5)
-    header_height = Inches(0.8)
+    # Outer box
+    box = slide.shapes.add_shape(1, left, top, width, height)
+    box.fill.solid()
+    box.fill.fore_color.rgb = DARK_BG
+    box.line.color.rgb = color['bg']
+    box.line.width = Pt(2)
     
-    cap_num_box = slide.shapes.add_textbox(header_left, header_top, Inches(0.6), header_height)
-    tf = cap_num_box.text_frame
-    tf.text = row_data['cap_num']
-    p = tf.paragraphs[0]
-    p.font.size = Pt(10)
-    p.font.bold = True
-    p.font.color.rgb = color['text']
-    
-    cap_title_box = slide.shapes.add_textbox(header_left + Inches(0.8), header_top, Inches(8.7), header_height)
-    tf = cap_title_box.text_frame
+    # Content
+    tf = box.text_frame
     tf.word_wrap = True
-    tf.text = row_data['cap_title']
-    p = tf.paragraphs[0]
-    p.font.size = Pt(24)
-    p.font.bold = True
-    p.font.color.rgb = color['text']
-    
-    # Three-column layout
-    col_width = Inches(2.9)
-    col_height = Inches(5.8)
-    col_left = Inches(0.5)
-    col_top = Inches(1.5)
-    col_gap = Inches(0.25)
-    
-    # Column 1: Pain Point
-    pain_box = slide.shapes.add_shape(1, col_left, col_top, col_width, col_height)
-    pain_box.fill.solid()
-    pain_box.fill.fore_color.rgb = DARK_BG
-    pain_box.line.color.rgb = color['bg']
-    pain_box.line.width = Pt(2)
-    
-    tf = pain_box.text_frame
-    tf.word_wrap = True
+    tf.margin_left = Inches(0.15)
+    tf.margin_right = Inches(0.15)
+    tf.margin_top = Inches(0.15)
     tf.margin_bottom = Inches(0.1)
-    tf.margin_left = Inches(0.2)
-    tf.margin_right = Inches(0.2)
-    tf.margin_top = Inches(0.2)
     
-    # Persona
+    # CAP number and title
     p = tf.paragraphs[0]
-    p.text = row_data['persona']
-    p.font.size = Pt(8)
+    p.text = f"{row_data['cap_num']} • {row_data['cap_title']}"
+    p.font.size = Pt(9)
     p.font.bold = True
     p.font.color.rgb = color['text']
     p.space_after = Pt(6)
     
-    # Pain text
+    # Persona
     p = tf.add_paragraph()
-    p.text = row_data['pain']
-    p.font.size = Pt(10)
+    p.text = row_data['persona']
+    p.font.size = Pt(7)
+    p.font.color.rgb = MUTED_TEXT
+    p.space_after = Pt(4)
+    
+    # Pain point
+    p = tf.add_paragraph()
+    p.text = f"PAIN: {row_data['pain']}"
+    p.font.size = Pt(7)
     p.font.color.rgb = LIGHT_TEXT
-    p.line_spacing = 1.3
-    
-    # Column 2: Capability
-    cap_left = col_left + col_width + col_gap
-    cap_box = slide.shapes.add_shape(1, cap_left, col_top, col_width, col_height)
-    cap_box.fill.solid()
-    cap_box.fill.fore_color.rgb = DARK_BG
-    cap_box.line.color.rgb = color['bg']
-    cap_box.line.width = Pt(2)
-    
-    tf = cap_box.text_frame
-    tf.word_wrap = True
-    tf.margin_bottom = Inches(0.1)
-    tf.margin_left = Inches(0.2)
-    tf.margin_right = Inches(0.2)
-    tf.margin_top = Inches(0.2)
+    p.line_spacing = 1.1
+    p.space_after = Pt(6)
     
     # Capability product
-    p = tf.paragraphs[0]
+    p = tf.add_paragraph()
     p.text = row_data['cap_product']
-    p.font.size = Pt(8)
+    p.font.size = Pt(7)
     p.font.color.rgb = MUTED_TEXT
-    p.space_after = Pt(8)
+    p.space_after = Pt(3)
     
     # Tags
     for tag in row_data['cap_tags']:
         p = tf.add_paragraph()
         p.text = f"• {tag}"
-        p.font.size = Pt(8)
+        p.font.size = Pt(6)
         p.font.color.rgb = color['text']
-        p.level = 0
-        p.space_after = Pt(4)
+        p.space_after = Pt(2)
     
     # Foundation badge for r1
     if row_data.get('foundation'):
         p = tf.add_paragraph()
-        p.text = "◆ Rapidminer Graph Studio — Foundation Layer"
-        p.font.size = Pt(8)
+        p.text = "◆ Graph Studio Foundation"
+        p.font.size = Pt(7)
         p.font.bold = True
         p.font.color.rgb = ACCENT_COLOR
-        p.space_before = Pt(10)
+        p.space_before = Pt(4)
+        p.space_after = Pt(4)
+    else:
+        p = tf.add_paragraph()
+        p.text = ""
+        p.space_after = Pt(4)
     
-    # Column 3: Outcome
-    outcome_left = cap_left + col_width + col_gap
-    outcome_box = slide.shapes.add_shape(1, outcome_left, col_top, col_width, col_height)
-    outcome_box.fill.solid()
-    outcome_box.fill.fore_color.rgb = DARK_BG
-    outcome_box.line.color.rgb = color['bg']
-    outcome_box.line.width = Pt(2)
-    
-    tf = outcome_box.text_frame
-    tf.word_wrap = True
-    tf.margin_bottom = Inches(0.1)
-    tf.margin_left = Inches(0.2)
-    tf.margin_right = Inches(0.2)
-    tf.margin_top = Inches(0.2)
-    
-    # Outcome title
-    p = tf.paragraphs[0]
-    p.text = row_data['outcome_title']
-    p.font.size = Pt(11)
+    # Outcome
+    p = tf.add_paragraph()
+    p.text = f"OUTCOME: {row_data['outcome_title']}"
+    p.font.size = Pt(8)
     p.font.bold = True
     p.font.color.rgb = color['text']
-    p.space_after = Pt(8)
+    p.space_after = Pt(2)
     
-    # Outcome description
     p = tf.add_paragraph()
     p.text = row_data['outcome_desc']
-    p.font.size = Pt(9)
+    p.font.size = Pt(7)
     p.font.color.rgb = MUTED_TEXT
-    p.line_spacing = 1.3
+    p.line_spacing = 1.1
 
 def get_pptx_binary():
     """Generate presentation and return binary data"""
